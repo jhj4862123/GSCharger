@@ -325,184 +325,35 @@ for i in tqdm(range(chargernum - 1)):
     위험표지 = wsSlave['33'][i + 2].value
     set_value('D51', 위험표지)
 
+    분전함lock = wsSlave['32'][i + 2].value
+    set_value('D52', 분전함lock)
 
+    분전함접지 = wsSlave['19'][i + 2].value
+    set_value('D53', 분전함접지)
 
+    과전류차단기 = wsSlave['15'][i + 2].value
+    set_value('J49', 과전류차단기)
 
+    누전차단기 = wsSlave['16'][i + 2].value
+    set_value('J50', 누전차단기)
 
+    감도전류 = wsSlave['17'][i + 2].value
+    set_value('J51', 감도전류)
 
+    전선굵기 = wsSlave['34'][i + 2].value
+    set_value('J52', 전선굵기)
 
+    접지저항 = wsSlave['13'][i + 2].value
+    set_value('E58', 접지저항)
 
+    접지선굵기 = wsSlave['35'][i + 2].value
+    set_value('E59', 접지선굵기)
 
+    소화설비 = wsSlave['25'][i + 2].value
+    set_value('D67', 소화설비)
 
-    #
-    # if wsSlave[29][2 + i].value is None:  # 변경하지 않은 값
-    #     위치 = wsSlave[34][2 + i].value
-    #     set_value('D13', 위치)
-    # else:  # 변경한 값
-    #     위치 = wsSlave[29][2 + i].value
-    #     set_value('D13', 위치)
-    #
-
-    #
-    #
-    #
-    #
-    #
-    # day001 = pd.to_datetime(점검날짜, format='%Y-%m-%d')
-    # day001 = day001.date()
-    #
-
-    #
-    # 온도 = wsSlave['6'][i + 2].value
-    # 온도 = str(온도) + str('℃')
-    # set_value('C4', 온도)
-    # set_value('G25', 온도)
-    #
-
-    #
-    # if wsSlave[8][2 + i].value is None:  # 충전기 설치유형
-    #     충전기설치유형 = '벽걸이형'
-    #     set_value('C11', 충전기설치유형)
-    # else:  # 변경한 값
-    #     충전기설치유형 = wsSlave[8][2 + i].value
-    #     set_value('C11', 충전기설치유형)
-    #
-
-    #
-    # 조도 = wsSlave['12'][i + 2].value
-    # 조도 = str(조도) + str('lux')
-    # set_value('G36', 조도)
-    #
-    # 접지저항 = wsSlave['13'][i + 2].value
-    # 접지저항 = str(접지저항) + str('Ω')
-    # set_value('G65', 접지저항)
-    #
-    # 절연저항 = wsSlave['14'][i + 2].value
-    # set_value('G69', 절연저항)
-    #
-    # 메인차단 = wsSlave['15'][i + 2].value
-    # set_value('G59', 메인차단)
-    #
-    # 누전차단 = wsSlave['16'][i + 2].value
-    # set_value('G60', 누전차단)
-    #
-    # 감도전류 = wsSlave['17'][i + 2].value
-    # set_value('G61', 감도전류)
-    #
-
-    #
-    # 문접지 = wsSlave['19'][i + 2].value
-    # set_value('G54', 문접지)
-    #
-    # 스토퍼 = wsSlave['20'][i + 2].value
-    # set_value('G38', 스토퍼)
-    #
-    # 설치위치 = wsSlave['23'][i + 2].value
-    # set_value('G42', 설치위치)
-    #
-    # 비상정지 = wsSlave['24'][i + 2].value
-    # set_value('G79', 비상정지)
-    #
-    # 소화기비치 = wsSlave['25'][i + 2].value
-    # set_value('G71', 소화기비치)
-    #
-    # 스프링쿨러 = wsSlave['26'][i + 2].value
-    # set_value('G70', 스프링쿨러)
-    #
-    # 충전기브라켓 = wsSlave['39'][i + 2].value
-    # set_value2('D8', 충전기브라켓)
-    #
-    # 라벨부착상태 = wsSlave['40'][i + 2].value
-    # set_value2('D9', 라벨부착상태)
-    #
-    # 수평수직 = wsSlave['41'][i + 2].value
-    # set_value2('D10', 수평수직)
-    #
-    # ac분전반상태 = wsSlave['43'][i + 2].value
-    # set_value2('D12', ac분전반상태)
-    #
-    # ac분전반용량 = wsSlave['44'][i + 2].value
-    # set_value2('D13', ac분전반용량)
-    #
-    # 인입홀밀폐 = wsSlave['45'][i + 2].value
-    # set_value2('D14', 인입홀밀폐)
-    #
-    # 분전반사용처 = wsSlave['46'][i + 2].value
-    # set_value2('D15', 분전반사용처)
-    #
-    # 절연부손상 = wsSlave['47'][i + 2].value
-    # set_value2('D16', 절연부손상)
-    #
-    # 케이블체결 = wsSlave['48'][i + 2].value
-    # set_value2('D17', 케이블체결)
-    #
-    # 열수축튜브상태 = wsSlave['49'][i + 2].value
-    # set_value2('D18', 열수축튜브상태)
-    #
-    # 열수축튜브색상 = wsSlave['50'][i + 2].value
-    # set_value2('D19', 열수축튜브색상)
-    #
-    # 전선굵기확인 = wsSlave['51'][i + 2].value
-    # set_value2('D20', 전선굵기확인)
-    #
-    # 부정확라벨링 = wsSlave['52'][i + 2].value
-    # set_value2('D21', 부정확라벨링)
-    #
-    # 누전차단기설치 = wsSlave['54'][i + 2].value
-    # set_value2('D23', 누전차단기설치)
-    #
-    # if wsSlave['55'][i + 2].value is not None:
-    #     단상연결 = wsSlave['55'][i + 2].value
-    #     set_value2('D24', 단상연결)
-    # elif wsSlave['56'][i + 2].value is not None:
-    #     삼상연결 = wsSlave['56'][i + 2].value
-    #     set_value2('D25', 삼상연결)
-    # else:
-    #     pass
-    #
-    # 접지육안확인 = wsSlave['58'][i + 2].value
-    # set_value2('D27', 접지육안확인)
-    #
-    # 접지반확인 = wsSlave['59'][i + 2].value
-    # set_value2('D28', 접지반확인)
-    #
-    # 볼트스크류 = wsSlave['60'][i + 2].value
-    # set_value2('D29', 볼트스크류)
-    #
-    # 접지러그2개 = wsSlave['61'][i + 2].value
-    # set_value2('D30', 접지러그2개)
-    #
-    # 케이블준수 = wsSlave['62'][i + 2].value
-    # set_value2('D31', 케이블준수)
-    #
-    # 나대지침하 = wsSlave['64'][i + 2].value
-    # set_value2('D33', 나대지침하)
-    #
-    # 기초대상단 = wsSlave['65'][i + 2].value
-    # set_value2('D34', 기초대상단)
-    #
-    # 충전기하단 = wsSlave['66'][i + 2].value
-    # set_value2('D35', 충전기하단)
-    #
-    # 높이150이상 = wsSlave['67'][i + 2].value
-    # set_value2('D36', 높이150이상)
-    #
-    # 물리적충격 = wsSlave['68'][i + 2].value
-    # set_value2('D37', 물리적충격)
-    #
-    # 충돌방지 = wsSlave['69'][i + 2].value
-    # set_value2('D38', 충돌방지)
-    #
-    # 캐노피조립 = wsSlave['70'][i + 2].value
-    # set_value2('D39', 캐노피조립)
-    #
-    # 프레임바닥 = wsSlave['71'][i + 2].value
-    # set_value2('D40', 프레임바닥)
-    #
-    # if wsSlave[27][2 + i].value != None:  # 충전기 설치유형
-    #     충전기설치유형 = wsSlave[27][2 + i].value
-    #     set_value('C81', 충전기설치유형)
-    #
+    day001 = pd.to_datetime(점검일자, format='%Y-%m-%d')
+    day001 = day001.date()
 
     passes = ['D21', 'D22', 'D23', 'D27', 'D28', 'D29', 'D34', 'D35', 'D50', 'D51', 'D54', 'G21', 'G22', 'G27', 'G28',
               'G29', 'G49', 'G50', 'G51', 'J21', 'J27', 'J28', 'J33', 'J36']
@@ -548,13 +399,13 @@ for i in tqdm(range(chargernum - 1)):
     ############################# 출력형식 ########################################
 
     if 사진없는개수[충전기번호] != 0:  # 사진이 있을 경우
-        wbMaster.save(str(충전기번호) + "-" + str(점검자이름) + "-" + str(day001) + ".xlsx")
+        wbMaster.save(str(충전기번호) + "-" + str(점검자) + "-" + str(day001) + ".xlsx")
     else:
         continue
-    shutil.move(str(충전기번호) + "-" + str(점검자이름) + "-" + str(day001) + ".xlsx",
-                resultpath + "/" + str(충전기번호) + "-" + str(점검자이름) + "-" + str(day001) + ".xlsx")
+    shutil.move(str(충전기번호) + "-" + str(점검자) + "-" + str(day001) + ".xlsx",
+                resultpath + "/" + str(충전기번호) + "-" + str(점검자) + "-" + str(day001) + ".xlsx")
     wbMaster.close()
-    print("\n" + str(충전기번호) + "-" + str(점검자이름) + "-" + str(day001) + ".xlsx" + " 파일이 생성되었습니다.")
+    print("\n" + str(충전기번호) + "-" + str(점검자) + "-" + str(day001) + ".xlsx" + " 파일이 생성되었습니다.")
 
 shutil.copy(path, newpath + '\점검데이터(' + ss + ').xlsx')
 
