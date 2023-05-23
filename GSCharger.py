@@ -125,13 +125,13 @@ wsSlave = wbSlave['점검정보']
 for i in range(2, len(df.loc[1])):
     column_chr = get_column_letter(i + 1)
 
-    wsSlave[30][i].value = "=VLOOKUP(" + column_chr + "2,기준정보!$B:$AM,3,FALSE)"
-    wsSlave[31][i].value = "=VLOOKUP(" + column_chr + "2,기준정보!$B:$AM,11,FALSE)"
-    wsSlave[32][i].value = "=VLOOKUP(" + column_chr + "2,기준정보!$B:$AM,37,FALSE) & \"/\" " + \
+    wsSlave[40][i].value = "=VLOOKUP(" + column_chr + "2,기준정보!$B:$AM,3,FALSE)"
+    wsSlave[41][i].value = "=VLOOKUP(" + column_chr + "2,기준정보!$B:$AM,11,FALSE)"
+    wsSlave[42][i].value = "=VLOOKUP(" + column_chr + "2,기준정보!$B:$AM,37,FALSE) & \"/\" " + \
                            "& VLOOKUP(" + column_chr + "2,기준정보!$B:$AM,38,FALSE)"
-    wsSlave[33][i].value = "=VLOOKUP(" + column_chr + "2,기준정보!$B:$AM,30,FALSE)"
-    wsSlave[34][i].value = "=VLOOKUP(" + column_chr + "2,기준정보!$B:$AM,34,FALSE)"
-    wsSlave[35][i].value = "=VLOOKUP(" + column_chr + "2,기준정보!$B:$AM,21,FALSE)"
+    wsSlave[43][i].value = "=VLOOKUP(" + column_chr + "2,기준정보!$B:$AM,30,FALSE)"
+    wsSlave[44][i].value = "=VLOOKUP(" + column_chr + "2,기준정보!$B:$AM,34,FALSE)"
+    wsSlave[45][i].value = "=VLOOKUP(" + column_chr + "2,기준정보!$B:$AM,21,FALSE)"
 
 wbSlave.save("점검데이터.xlsx")
 # wbSlave.close()
@@ -231,9 +231,9 @@ wbSlave.save("점검데이터.xlsx")
 
 from openpyxl.drawing.image import Image
 
-wbMaster = load_workbook('점검양식.xlsx')
-wsMaster = wbMaster['점검양식']
-wsNew = wbMaster['체크리스트']
+wbMaster = load_workbook('정기점검보고서.xlsx')
+wsMaster = wbMaster['정기점검보고서']
+wsNew = wbMaster['정기점검보고서']
 
 wbSlave = load_workbook('점검데이터.xlsx', data_only=True)
 wsSlave = wbSlave['점검정보']
@@ -253,9 +253,9 @@ for i in tqdm(range(chargernum - 1)):
         warningphoto.append(충전기번호)
         continue
 
-    wbMaster = load_workbook('점검양식.xlsx')
-    wsMaster = wbMaster['점검양식']
-    wsNew = wbMaster['체크리스트']
+    wbMaster = load_workbook('정기점검보고서.xlsx')
+    wsMaster = wbMaster['정기점검보고서']
+    wsNew = wbMaster['정기점검보고서']
     wbSlave = load_workbook('점검데이터.xlsx', data_only=True)
     # slavestandard = wbSlave['참조데이터']
     wsSlave = wbSlave['점검정보']
@@ -266,7 +266,7 @@ for i in tqdm(range(chargernum - 1)):
     set_value('C5', 점검일자)
 
     점검자 = wsSlave['3'][i + 2].value
-    set_value('G3', 점검자)
+    set_value('H5', 점검자)
 
     주변온도 = wsSlave['6'][i + 2].value
     set_value('C6', 주변온도)
@@ -274,28 +274,28 @@ for i in tqdm(range(chargernum - 1)):
     습도 = wsSlave['7'][i + 2].value
     set_value('H6', 습도)
 
-    충전소이름 = wsSlave['40'][i + 2].value
+    충전소이름 = str(wsSlave['40'][i + 2].value)
     set_value('B8', "충전소 이름 : " + 충전소이름)
 
-    충전기제조사 = wsSlave['41'][2 + i].value
+    충전기제조사 = str(wsSlave['41'][2 + i].value)
     set_value('B9', "충전기 제조사 : " + 충전기제조사)
 
-    충전소좌표 = wsSlave['42'][2 + i].value
+    충전소좌표 = str(wsSlave['42'][2 + i].value)
     set_value('B10', "충전소 좌표 : " + 충전소좌표)
 
-    충전소주소 = wsSlave['43'][2 + i].value
+    충전소주소 = str(wsSlave['43'][2 + i].value)
     set_value('B11', "충전소 주소 : " + 충전소주소)
 
-    충전기위치 = wsSlave['44'][2 + i].value
+    충전기위치 = str(wsSlave['44'][2 + i].value)
     set_value('B12', "충전기 위치 : " + 충전기위치)
 
-    전압 = wsSlave['11'][i + 2].value
+    전압 = str(wsSlave['11'][i + 2].value)
     set_value('C15', 전압 + "V")
 
-    충전기용량 = wsSlave['45'][2 + i].value
+    충전기용량 = str(wsSlave['45'][2 + i].value)
     set_value('E15', 충전기용량 + "kW")
 
-    수량 = wsSlave['5'][i + 2].value
+    수량 = str(wsSlave['5'][i + 2].value)
     set_value('G9', "충전기 총수량 : " + 수량 + "대")
 
     무료주차 = wsSlave['27'][i + 2].value
