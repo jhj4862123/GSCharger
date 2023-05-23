@@ -30,6 +30,7 @@ root.resizable(False, False)  # 가로 *세로 사이즈 변경 가능 유무
 
 dir_path = None  # 폴더 경로 담을 변수 생성
 
+excelfilenum = 0
 
 def folder_select():
     global dir_path
@@ -204,11 +205,11 @@ for name in data.iloc[0, 1:]:  # None 없애기
         width, height = img.size[:2]
 
         if height >= width:
-            img = img.resize((385, 385))
+            img = img.resize((277, 277))
             resize_img = img.save(base + str(name) + "-" + str(j) + "(resize).jpg")
 
         else:
-            img = img.resize((515, 385))
+            img = img.resize((312, 277))
             resize_img = img.save(base + str(name) + "-" + str(j) + "(resize).jpg")
 
 ############################# 파일 생성 실패 시 배경색 채우기 ########################################
@@ -293,7 +294,7 @@ for i in tqdm(range(chargernum - 1)):
     set_value('C15', 전압 + "V")
 
     충전기용량 = str(wsSlave['45'][2 + i].value)
-    set_value('E15', 충전기용량 + "kW")
+    set_value('E15', 충전기용량)
 
     수량 = str(wsSlave['5'][i + 2].value)
     set_value('G9', "충전기 총수량 : " + 수량 + "대")
@@ -402,8 +403,11 @@ for i in tqdm(range(chargernum - 1)):
         wbMaster.save(str(충전기번호) + "-" + str(점검자) + "-" + str(day001) + ".xlsx")
     else:
         continue
+
     shutil.move(str(충전기번호) + "-" + str(점검자) + "-" + str(day001) + ".xlsx",
                 resultpath + "/" + str(충전기번호) + "-" + str(점검자) + "-" + str(day001) + ".xlsx")
+    excelfilenum = excelfilenum + 1
+
     wbMaster.close()
     print("\n" + str(충전기번호) + "-" + str(점검자) + "-" + str(day001) + ".xlsx" + " 파일이 생성되었습니다.")
 
@@ -420,7 +424,7 @@ files = os.listdir(photosrc)
 for f in files:
     shutil.move(photosrc + f, movephoto + f)
 
-print("총" + str(chargernum) + "개의 파일이 생성되었습니다.")
+print("총 " + str(excelfilenum) + "개의 파일이 생성되었습니다.")
 warning()
 # shutil.move("생성되지 않은 파일.txt", newpath + '\생성되지 않은 파일(' + ss +').txt')
 
