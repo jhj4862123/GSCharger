@@ -1,20 +1,21 @@
-import re
 import os
+import re
 import shutil
-import win32com.client  # pip install pywin32
-import win32api
-import pandas as pd
-
-from openpyxl import load_workbook
-from openpyxl.styles import PatternFill, Alignment
 from datetime import datetime
 from tkinter import *
 from tkinter import filedialog
 from tkinter import messagebox
+
+import pandas as pd
+import win32api
+import win32com.client  # pip install pywin32
+from PIL import ImageFile
+from openpyxl import load_workbook
 from openpyxl.styles import Color
+from openpyxl.styles import PatternFill, Alignment
 from openpyxl.utils import get_column_letter
 from tqdm import tqdm
-from PIL import ImageFile
+
 ImageFile.LOAD_TRUNCATED_IMAGES = True
 
 ############################ 이미지 폴더 선택 ########################################
