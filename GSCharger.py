@@ -259,7 +259,7 @@ for i in tqdm(range(chargernum - 1)):
     wsNew = wbMaster['정기점검보고서']
     wbSlave = load_workbook('점검데이터.xlsx', data_only=True)
     # slavestandard = wbSlave['참조데이터']
-    wsSlave = wbSlave['점검정보']
+    wsSlave = wbSlave['정기점검보고서']
 
     set_value('G7', 충전기번호)
 
