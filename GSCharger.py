@@ -1,7 +1,6 @@
 import os
 import re
 import shutil
-from collections import defaultdict
 from datetime import datetime
 from tkinter import *
 from tkinter import filedialog
@@ -10,14 +9,11 @@ from tkinter import messagebox
 import pandas as pd
 import win32api
 import win32com.client  # pip install pywin32
-from PIL import ImageFile
 from openpyxl import load_workbook
 from openpyxl.styles import Color
 from openpyxl.styles import PatternFill, Alignment
 from openpyxl.utils import get_column_letter
 from tqdm import tqdm
-
-ImageFile.LOAD_TRUNCATED_IMAGES = True
 
 ############################ 이미지 폴더 선택 ########################################
 root = Tk()
@@ -143,9 +139,6 @@ for i in range(1, len(df.loc[1])):
     wsSlave[44][i].value = "=VLOOKUP(" + column_chr + "2,기준정보!$B:$AM,34,FALSE)"
     wsSlave[45][i].value = "=VLOOKUP(" + column_chr + "2,기준정보!$B:$AM,21,FALSE)"
 
-    if wsSlave[40][i].value == "#N/A":
-        fill = PatternFill(start_color='FF9900', end_color='FF9900', fill_type='solid')
-        wsSlave[40][i].fill = fill
 
 wbSlave.save("점검데이터.xlsx")
 # wbSlave.close()
@@ -192,10 +185,11 @@ from PIL import Image
 
 chargernum = 1  # 충전기의 갯수
 사진없는개수 = {}
-사진없는개수 = defaultdict(int)  # 사진이 없는 개수를 기록할 사전
 
 for name in data.iloc[0, 1:]:  # None 없애기
     chargernum += 1
+    k=0
+    사진없는개수[name] = [0 for i in range(6)]
     for j in range(1, 7):
         fileName = os.path.join(base, str(name) + "_" + str(j) + ".jpg")
         tempName = os.path.join(base, str(name) + "-" + str(j) + ".jpg")
@@ -207,7 +201,9 @@ for name in data.iloc[0, 1:]:  # None 없애기
             shutil.move(tempName, fileName)
             img = Image.open(fileName)
         else:
-            사진없는개수[name] += 1  # 사진이 없는 개수를 증가시킴
+            k += 1
+            사진없는개수[name] = k
+            # 사진이 없는 개수를 증가시킴
             continue
         img = img.convert('RGB')
 
@@ -239,6 +235,8 @@ wbSlave.save("점검데이터.xlsx")
 
 ############################# 양식 ########################################
 
+from openpyxl.drawing.image import Image
+
 wbMaster = load_workbook('정기점검보고서.xlsx')
 wsMaster = wbMaster['정기점검보고서']
 wsNew = wbMaster['정기점검보고서']
@@ -255,12 +253,6 @@ existphoto = []
 ############################# 변수들 ########################################
 for i in tqdm(range(chargernum - 1)):
 
-    충전기번호 = wsSlave.cell(row=2, column=i + 2).value
-    print(사진없는개수.get(충전기번호))
-    if 사진없는개수.get(충전기번호) == 6:
-        # for x in 사진없는개수:
-        warningphoto.append(충전기번호)
-        #continue
 
     wbMaster = load_workbook('정기점검보고서.xlsx')
     wsMaster = wbMaster['정기점검보고서']
@@ -269,20 +261,19 @@ for i in tqdm(range(chargernum - 1)):
     # slavestandard = wbSlave['참조데이터']
     wsSlave = wbSlave['점검정보']
 
+    충전기번호 = wsSlave['2'][i + 1].value
     set_value('G7', 충전기번호)
+
+    if 사진없는개수.get(충전기번호) == 6:
+        # for x in 사진없는개수:
+        warningphoto.append(충전기번호)
+        continue
 
     점검일자 = wsSlave['4'][1 + i].value
     set_value('C5', 점검일자)
 
-    if 점검일자 == "#N/A":
-        print("점검일자가 설정되지 않았습니다.")
-    else:
-        try:
-            day001 = pd.to_datetime(점검일자, format='%Y-%m-%d')
-            day001 = day001.date()
-            print(day001)
-        except ValueError:
-            print("유효한 날짜 형식이 아닙니다.")
+    day001 = pd.to_datetime(점검일자, format='%Y-%m-%d')
+    day001 = day001.date()
 
     점검자 = wsSlave['3'][1 + i].value
     set_value('H5', 점검자)
@@ -296,11 +287,9 @@ for i in tqdm(range(chargernum - 1)):
     충전소이름 = str(wsSlave['40'][1 + i].value)
     set_value('B8', "충전소 이름 : " + 충전소이름)
 
-    if 충전소이름 == "#N/A":
-        noChargNum.append(충전기번호)
-        print(str(충전기번호) + "는 등록되지 않은 충전기입니다.")
-
-    continue
+    # if 충전소이름 == "#N/A":
+    #     noChargNum.append(충전기번호)
+    #     print(str(충전기번호) + "는 등록되지 않은 충전기입니다.")
 
     충전기제조사 = str(wsSlave['41'][1 + i].value)
     set_value('B9', "충전기 제조사 : " + 충전기제조사)
@@ -420,14 +409,12 @@ for i in tqdm(range(chargernum - 1)):
         #   print(f"{src_img[j]} (src image file) 사진이 없습니다.")
     ############################# 출력형식 ########################################
 
-    if 사진없는개수[충전기번호] != 0 or wsSlave[40][i].value != "#N/A":  # 사진이 있거나 충전기 번호가 있는 경우
-        wbMaster.save(str(충전기번호) + "-" + str(점검자) + "-" + str(day001) + ".xlsx")
-    else:
-        continue
+        if 사진없는개수[충전기번호] != 0:  # 사진이 있을 경우
+            wbMaster.save(str(충전기번호) + "-" + str(점검자) + "-" + str(day001) + ".xlsx")
+        else:
+            continue
     shutil.move(str(충전기번호) + "-" + str(점검자) + "-" + str(day001) + ".xlsx",
                 resultpath + "/" + str(충전기번호) + "-" + str(점검자) + "-" + str(day001) + ".xlsx")
-    excelfilenum = excelfilenum + 1
-
     wbMaster.close()
     print("\n" + str(충전기번호) + "-" + str(점검자) + "-" + str(day001) + ".xlsx" + " 파일이 생성되었습니다.")
 
