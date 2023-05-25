@@ -1,6 +1,7 @@
 import os
 import re
 import shutil
+from collections import defaultdict
 from datetime import datetime
 from tkinter import *
 from tkinter import filedialog
@@ -31,6 +32,7 @@ root.resizable(False, False)  # 가로 *세로 사이즈 변경 가능 유무
 dir_path = None  # 폴더 경로 담을 변수 생성
 
 excelfilenum = 0
+
 
 def folder_select():
     global dir_path
@@ -63,8 +65,15 @@ def warning():
         f.write(ss + " 기준\n")
         f.write('#' * 40 + '\n')
 
-        for i in range(1, len(warningphoto)):
-            f.write('충전기 [ {0:^10} ]번 파일 생성이 실패하였습니다.\n'.format(warningphoto[i]))  # 가운데 정렬
+        print(len(warningphoto))
+
+        for count in range(len(warningphoto)): # 사진이 없는 경우
+            if warningphoto[count] != 0:
+                f.write('충전기 [ {0} ]번 파일은 그림이 없어 생성 실패했습니다.\n'.format(warningphoto))  # 가운데 정렬
+
+        for cnt in range(len(noChargNum)): # 충전기 번호가 없는 경우
+            if noChargNum[cnt] != 0:
+                f.write('충전기 [ {0} ]번 파일은 등록되지 않은 충전기 번호이니 참고하시기 바랍니다.\n'.format(noChargNum))  # 가운데 정렬
             # f.write('충전기 [ {0:>10} ]이 파일 생성에 실패하였습니다.\n'.format(warningphoto[i]))  # 오른쪽 정렬
         f.write('#' * 40)
         f.close()
@@ -123,7 +132,7 @@ df = pd.read_excel('점검데이터.xlsx')
 wbSlave = load_workbook('점검데이터.xlsx')
 wsSlave = wbSlave['점검정보']
 
-for i in range(2, len(df.loc[1])):
+for i in range(1, len(df.loc[1])):
     column_chr = get_column_letter(i + 1)
 
     wsSlave[40][i].value = "=VLOOKUP(" + column_chr + "2,기준정보!$B:$AM,3,FALSE)"
@@ -133,6 +142,10 @@ for i in range(2, len(df.loc[1])):
     wsSlave[43][i].value = "=VLOOKUP(" + column_chr + "2,기준정보!$B:$AM,30,FALSE)"
     wsSlave[44][i].value = "=VLOOKUP(" + column_chr + "2,기준정보!$B:$AM,34,FALSE)"
     wsSlave[45][i].value = "=VLOOKUP(" + column_chr + "2,기준정보!$B:$AM,21,FALSE)"
+
+    if wsSlave[40][i].value == "#N/A":
+        fill = PatternFill(start_color='FF9900', end_color='FF9900', fill_type='solid')
+        wsSlave[40][i].fill = fill
 
 wbSlave.save("점검데이터.xlsx")
 # wbSlave.close()
@@ -177,15 +190,12 @@ for name in file_names:
 ############################# 충전기 갯수 카운트 및 이미지 리사이즈 ########################################
 from PIL import Image
 
-chargernum = 0  # 충전기의 갯수
-사진없는개수 = {
-
-}
+chargernum = 1  # 충전기의 갯수
+사진없는개수 = {}
+사진없는개수 = defaultdict(int)  # 사진이 없는 개수를 기록할 사전
 
 for name in data.iloc[0, 1:]:  # None 없애기
     chargernum += 1
-    k = 0
-    사진없는개수[name] = [0 for i in range(6)]
     for j in range(1, 7):
         fileName = os.path.join(base, str(name) + "_" + str(j) + ".jpg")
         tempName = os.path.join(base, str(name) + "-" + str(j) + ".jpg")
@@ -197,8 +207,7 @@ for name in data.iloc[0, 1:]:  # None 없애기
             shutil.move(tempName, fileName)
             img = Image.open(fileName)
         else:
-            k += 1
-            사진없는개수[name] = k
+            사진없는개수[name] += 1  # 사진이 없는 개수를 증가시킴
             continue
         img = img.convert('RGB')
 
@@ -230,8 +239,6 @@ wbSlave.save("점검데이터.xlsx")
 
 ############################# 양식 ########################################
 
-from openpyxl.drawing.image import Image
-
 wbMaster = load_workbook('정기점검보고서.xlsx')
 wsMaster = wbMaster['정기점검보고서']
 wsNew = wbMaster['정기점검보고서']
@@ -242,17 +249,18 @@ wsSlave = wbSlave['점검정보']
 ############################# 추가해서 수정해야함 ########################################
 
 warningphoto = []
+noChargNum = []
+
 existphoto = []
 ############################# 변수들 ########################################
-
 for i in tqdm(range(chargernum - 1)):
 
-    충전기번호 = wsSlave['2'][i + 2].value
-
+    충전기번호 = wsSlave.cell(row=2, column=i + 2).value
+    print(사진없는개수.get(충전기번호))
     if 사진없는개수.get(충전기번호) == 6:
         # for x in 사진없는개수:
         warningphoto.append(충전기번호)
-        continue
+        #continue
 
     wbMaster = load_workbook('정기점검보고서.xlsx')
     wsMaster = wbMaster['정기점검보고서']
@@ -263,98 +271,111 @@ for i in tqdm(range(chargernum - 1)):
 
     set_value('G7', 충전기번호)
 
-    점검일자 = wsSlave['4'][i + 2].value
+    점검일자 = wsSlave['4'][1 + i].value
     set_value('C5', 점검일자)
 
-    점검자 = wsSlave['3'][i + 2].value
+    if 점검일자 == "#N/A":
+        print("점검일자가 설정되지 않았습니다.")
+    else:
+        try:
+            day001 = pd.to_datetime(점검일자, format='%Y-%m-%d')
+            day001 = day001.date()
+            print(day001)
+        except ValueError:
+            print("유효한 날짜 형식이 아닙니다.")
+
+    점검자 = wsSlave['3'][1 + i].value
     set_value('H5', 점검자)
 
-    주변온도 = wsSlave['6'][i + 2].value
+    주변온도 = wsSlave['6'][1 + i].value
     set_value('C6', 주변온도)
 
-    습도 = wsSlave['7'][i + 2].value
+    습도 = wsSlave['7'][1 + i].value
     set_value('H6', 습도)
 
-    충전소이름 = str(wsSlave['40'][i + 2].value)
+    충전소이름 = str(wsSlave['40'][1 + i].value)
     set_value('B8', "충전소 이름 : " + 충전소이름)
 
-    충전기제조사 = str(wsSlave['41'][2 + i].value)
+    if 충전소이름 == "#N/A":
+        noChargNum.append(충전기번호)
+        print(str(충전기번호) + "는 등록되지 않은 충전기입니다.")
+
+    continue
+
+    충전기제조사 = str(wsSlave['41'][1 + i].value)
     set_value('B9', "충전기 제조사 : " + 충전기제조사)
 
-    충전소좌표 = str(wsSlave['42'][2 + i].value)
+    충전소좌표 = str(wsSlave['42'][1 + i].value)
     set_value('B10', "충전소 좌표 : " + 충전소좌표)
 
-    충전소주소 = str(wsSlave['43'][2 + i].value)
+    충전소주소 = str(wsSlave['43'][1 + i].value)
     set_value('B11', "충전소 주소 : " + 충전소주소)
 
-    충전기위치 = str(wsSlave['44'][2 + i].value)
+    충전기위치 = str(wsSlave['44'][1 + i].value)
     set_value('B12', "충전기 위치 : " + 충전기위치)
 
-    전압 = str(wsSlave['11'][i + 2].value)
+    전압 = str(wsSlave['11'][1 + i].value)
     set_value('C15', 전압 + "V")
 
-    충전기용량 = str(wsSlave['45'][2 + i].value)
+    충전기용량 = str(wsSlave['45'][1 + i].value)
     set_value('E15', 충전기용량)
 
-    수량 = str(wsSlave['5'][i + 2].value)
+    수량 = str(wsSlave['5'][1 + i].value)
     set_value('G9', "충전기 총수량 : " + 수량 + "대")
 
-    무료주차 = wsSlave['27'][i + 2].value
+    무료주차 = wsSlave['27'][1 + i].value
     set_value('D23', 무료주차)
 
-    급속완속 = wsSlave['28'][i + 2].value
+    급속완속 = wsSlave['28'][1 + i].value
     set_value('J22', 급속완속)
 
-    적정조명 = wsSlave['12'][i + 2].value
+    적정조명 = wsSlave['12'][1 + i].value
     set_value('G33', 적정조명)
 
-    비상정지 = wsSlave['18'][i + 2].value
+    비상정지 = wsSlave['18'][1 + i].value
     set_value('G37', 비상정지)
 
-    환경부카드 = wsSlave['29'][i + 2].value
+    환경부카드 = wsSlave['29'][1 + i].value
     set_value('J37', 환경부카드)
 
-    커넥터균열 = wsSlave['30'][i + 2].value
+    커넥터균열 = wsSlave['30'][1 + i].value
     set_value('G42', 커넥터균열)
 
-    볼라드고정 = wsSlave['31'][i + 2].value
+    볼라드고정 = wsSlave['31'][1 + i].value
     set_value('D43', 볼라드고정)
 
-    보호잠금장치 = wsSlave['32'][i + 2].value
+    보호잠금장치 = wsSlave['32'][1 + i].value
     set_value('G43', 보호잠금장치)
 
-    위험표지 = wsSlave['33'][i + 2].value
+    위험표지 = wsSlave['33'][1 + i].value
     set_value('D51', 위험표지)
 
-    분전함lock = wsSlave['32'][i + 2].value
+    분전함lock = wsSlave['32'][1 + i].value
     set_value('D52', 분전함lock)
 
-    분전함접지 = wsSlave['19'][i + 2].value
+    분전함접지 = wsSlave['19'][1 + i].value
     set_value('D53', 분전함접지)
 
-    과전류차단기 = wsSlave['15'][i + 2].value
+    과전류차단기 = wsSlave['15'][1 + i].value
     set_value('J49', 과전류차단기)
 
-    누전차단기 = wsSlave['16'][i + 2].value
+    누전차단기 = wsSlave['16'][1 + i].value
     set_value('J50', 누전차단기)
 
-    감도전류 = wsSlave['17'][i + 2].value
+    감도전류 = wsSlave['17'][1 + i].value
     set_value('J51', 감도전류)
 
-    전선굵기 = wsSlave['34'][i + 2].value
+    전선굵기 = wsSlave['34'][1 + i].value
     set_value('J52', 전선굵기)
 
-    접지저항 = wsSlave['13'][i + 2].value
+    접지저항 = wsSlave['13'][1 + i].value
     set_value('E58', 접지저항)
 
-    접지선굵기 = wsSlave['35'][i + 2].value
+    접지선굵기 = wsSlave['35'][1 + i].value
     set_value('E59', 접지선굵기)
 
-    소화설비 = wsSlave['25'][i + 2].value
+    소화설비 = wsSlave['25'][1 + i].value
     set_value('D67', 소화설비)
-
-    day001 = pd.to_datetime(점검일자, format='%Y-%m-%d')
-    day001 = day001.date()
 
     passes = ['D21', 'D22', 'D23', 'D27', 'D28', 'D29', 'D34', 'D35', 'D50', 'D51', 'D54', 'G21', 'G22', 'G27', 'G28',
               'G29', 'G49', 'G50', 'G51', 'J21', 'J27', 'J28', 'J33', 'J36']
@@ -399,11 +420,10 @@ for i in tqdm(range(chargernum - 1)):
         #   print(f"{src_img[j]} (src image file) 사진이 없습니다.")
     ############################# 출력형식 ########################################
 
-    if 사진없는개수[충전기번호] != 0:  # 사진이 있을 경우
+    if 사진없는개수[충전기번호] != 0 or wsSlave[40][i].value != "#N/A":  # 사진이 있거나 충전기 번호가 있는 경우
         wbMaster.save(str(충전기번호) + "-" + str(점검자) + "-" + str(day001) + ".xlsx")
     else:
         continue
-
     shutil.move(str(충전기번호) + "-" + str(점검자) + "-" + str(day001) + ".xlsx",
                 resultpath + "/" + str(충전기번호) + "-" + str(점검자) + "-" + str(day001) + ".xlsx")
     excelfilenum = excelfilenum + 1
