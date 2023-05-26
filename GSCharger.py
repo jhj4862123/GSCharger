@@ -63,13 +63,14 @@ def warning():
 
         print(len(warningphoto))
 
-        for count in range(len(warningphoto)): # 사진이 없는 경우
-            if warningphoto[count] != 0:
-                f.write('충전기 [ {0} ]번 파일은 그림이 없어 생성 실패했습니다.\n'.format(warningphoto))  # 가운데 정렬
+        for count in range(len(warningphoto)):  # 사진이 없는 경우
 
-        for cnt in range(len(noChargNum)): # 충전기 번호가 없는 경우
-            if noChargNum[cnt] != 0:
-                f.write('충전기 [ {0} ]번 파일은 등록되지 않은 충전기 번호이니 참고하시기 바랍니다.\n'.format(noChargNum))  # 가운데 정렬
+            if warningphoto[count] != 0:
+                f.write('충전기 [ {0} ]번 파일은 그림이 없어 생성 실패했습니다.\n'.format(', '.join(map(str, warningphoto))))  # 가운데 정렬
+
+        # for cnt in range(len(noChargNum)): # 충전기 번호가 없는 경우
+        if len(noChargNum) != 0:
+            f.write('충전기 [ {0} ]번 파일은 등록되지 않은 충전기 번호이니 참고하시기 바랍니다.\n'.format(', '.join(map(str, noChargNum))))  # 가운데 정렬
             # f.write('충전기 [ {0:>10} ]이 파일 생성에 실패하였습니다.\n'.format(warningphoto[i]))  # 오른쪽 정렬
         f.write('#' * 40)
         f.close()
@@ -139,7 +140,6 @@ for i in range(1, len(df.loc[1])):
     wsSlave[44][i].value = "=VLOOKUP(" + column_chr + "2,기준정보!$B:$AM,34,FALSE)"
     wsSlave[45][i].value = "=VLOOKUP(" + column_chr + "2,기준정보!$B:$AM,21,FALSE)"
 
-
 wbSlave.save("점검데이터.xlsx")
 # wbSlave.close()
 
@@ -188,7 +188,7 @@ chargernum = 1  # 충전기의 갯수
 
 for name in data.iloc[0, 1:]:  # None 없애기
     chargernum += 1
-    k=0
+    k = 0
     사진없는개수[name] = [0 for i in range(6)]
     for j in range(1, 7):
         fileName = os.path.join(base, str(name) + "_" + str(j) + ".jpg")
@@ -203,18 +203,17 @@ for name in data.iloc[0, 1:]:  # None 없애기
         else:
             k += 1
             사진없는개수[name] = k
-            # 사진이 없는 개수를 증가시킴
             continue
         img = img.convert('RGB')
 
         width, height = img.size[:2]
 
         if height >= width:
-            img = img.resize((277, 277))
+            img = img.resize((260, 260))
             resize_img = img.save(base + str(name) + "-" + str(j) + "(resize).jpg")
 
         else:
-            img = img.resize((312, 277))
+            img = img.resize((312, 260))
             resize_img = img.save(base + str(name) + "-" + str(j) + "(resize).jpg")
 
 ############################# 파일 생성 실패 시 배경색 채우기 ########################################
@@ -253,7 +252,6 @@ existphoto = []
 ############################# 변수들 ########################################
 for i in tqdm(range(chargernum - 1)):
 
-
     wbMaster = load_workbook('정기점검보고서.xlsx')
     wsMaster = wbMaster['정기점검보고서']
     wsNew = wbMaster['정기점검보고서']
@@ -267,7 +265,6 @@ for i in tqdm(range(chargernum - 1)):
     if 사진없는개수.get(충전기번호) == 6:
         # for x in 사진없는개수:
         warningphoto.append(충전기번호)
-        continue
 
     점검일자 = wsSlave['4'][1 + i].value
     set_value('C5', 점검일자)
@@ -287,9 +284,14 @@ for i in tqdm(range(chargernum - 1)):
     충전소이름 = str(wsSlave['40'][1 + i].value)
     set_value('B8', "충전소 이름 : " + 충전소이름)
 
-    # if 충전소이름 == "#N/A":
-    #     noChargNum.append(충전기번호)
-    #     print(str(충전기번호) + "는 등록되지 않은 충전기입니다.")
+    if 충전소이름 == "#N/A":
+        noChargNum.append(충전기번호)
+        print(str(충전기번호) + "은(는) 등록되지 않은 충전기입니다.")
+        wsSlave['2'][i + 1].fill = PatternFill(fill_type='solid', fgColor=Color('FF0000'))
+        wbSlave.save("점검데이터.xlsx")
+        continue
+
+    excelfilenum = excelfilenum + 1
 
     충전기제조사 = str(wsSlave['41'][1 + i].value)
     set_value('B9', "충전기 제조사 : " + 충전기제조사)
@@ -407,10 +409,11 @@ for i in tqdm(range(chargernum - 1)):
             #    print(f"{fileName} (===>fileName) ")
         # else:
         #   print(f"{src_img[j]} (src image file) 사진이 없습니다.")
-    ############################# 출력형식 ########################################
+        ############################# 출력형식 ########################################
 
         if 사진없는개수[충전기번호] != 0:  # 사진이 있을 경우
             wbMaster.save(str(충전기번호) + "-" + str(점검자) + "-" + str(day001) + ".xlsx")
+
         else:
             continue
     shutil.move(str(충전기번호) + "-" + str(점검자) + "-" + str(day001) + ".xlsx",
