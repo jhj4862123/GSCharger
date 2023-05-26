@@ -63,24 +63,24 @@ def warning():
 
         print(len(warningphoto))
 
-        for count in range(len(warningphoto)):  # 사진이 없는 경우
+        # if len(warningphoto) != 0:
+        f.write('충전기 [ {0:>10} ]번 사진정보 확인 바랍니다.\n'.format(', '.join(map(str, warningphoto))))   # 가운데 정렬
 
-            if warningphoto[count] != 0:
-                f.write('충전기 [ {0} ]번 파일은 그림이 없어 생성 실패했습니다.\n'.format(', '.join(map(str, warningphoto))))  # 가운데 정렬
+        #for cnt in range(len(noChargNum)): # 충전기 번호가 없는 경우
+    if len(noChargNum) != 0:
+        # f.write('충전기 [ {0} ]번 파일은 등록되지 않은 충전기 번호이니 참고하시기 바랍니다.\n'.format(', '.join(map(str, noChargNum))))  # 가운데 정렬
+        f.write('충전기 [ {0:>10} ]번 기준정보 확인 바랍니다.\n'.format(', '.join(map(str, noChargNum))))  # 가운데 정렬
+        # f.write('충전기 [ {0:>10} ]이 파일 생성에 실패하였습니다.\n'.format(warningphoto[i]))  # 오른쪽 정렬
 
-        # for cnt in range(len(noChargNum)): # 충전기 번호가 없는 경우
-        if len(noChargNum) != 0:
-            f.write('충전기 [ {0} ]번 파일은 등록되지 않은 충전기 번호이니 참고하시기 바랍니다.\n'.format(', '.join(map(str, noChargNum))))  # 가운데 정렬
-            # f.write('충전기 [ {0:>10} ]이 파일 생성에 실패하였습니다.\n'.format(warningphoto[i]))  # 오른쪽 정렬
-        f.write('#' * 40)
-        f.close()
+    f.write('#' * 40)
+    f.close()
 
-        f = open(f"생성되지 않은 파일_{ss}.txt", 'r')
-        data = f.read()
-        f.close()
-        win32api.MessageBox(0, f"{data}", "파일생성오류", 16)
-        print(data)
-        shutil.move(f"생성되지 않은 파일_{ss}.txt", finishpath + f"생성되지 않은 파일_{ss}.txt")
+    f = open(f"생성되지 않은 파일_{ss}.txt", 'r')
+    data = f.read()
+    f.close()
+    win32api.MessageBox(0, f"{data}", "파일생성오류", 16)
+    print(data)
+    shutil.move(f"생성되지 않은 파일_{ss}.txt", finishpath + f"생성되지 않은 파일_{ss}.txt")
 
 
 btn_active_dir = Button(file_frame, text="충전기 사진을 선택해 주세요. \n\n사진 형식 : 충전기번호_1.jpg\n ex) 1234_1.jpg", \
@@ -140,6 +140,7 @@ for i in range(1, len(df.loc[1])):
     wsSlave[44][i].value = "=VLOOKUP(" + column_chr + "2,기준정보!$B:$AM,34,FALSE)"
     wsSlave[45][i].value = "=VLOOKUP(" + column_chr + "2,기준정보!$B:$AM,21,FALSE)"
 
+
 wbSlave.save("점검데이터.xlsx")
 # wbSlave.close()
 
@@ -188,7 +189,7 @@ chargernum = 1  # 충전기의 갯수
 
 for name in data.iloc[0, 1:]:  # None 없애기
     chargernum += 1
-    k = 0
+    k=0
     사진없는개수[name] = [0 for i in range(6)]
     for j in range(1, 7):
         fileName = os.path.join(base, str(name) + "_" + str(j) + ".jpg")
@@ -251,6 +252,7 @@ noChargNum = []
 existphoto = []
 ############################# 변수들 ########################################
 for i in tqdm(range(chargernum - 1)):
+
 
     wbMaster = load_workbook('정기점검보고서.xlsx')
     wsMaster = wbMaster['정기점검보고서']
@@ -409,7 +411,7 @@ for i in tqdm(range(chargernum - 1)):
             #    print(f"{fileName} (===>fileName) ")
         # else:
         #   print(f"{src_img[j]} (src image file) 사진이 없습니다.")
-        ############################# 출력형식 ########################################
+    ############################# 출력형식 ########################################
 
         if 사진없는개수[충전기번호] != 0:  # 사진이 있을 경우
             wbMaster.save(str(충전기번호) + "-" + str(점검자) + "-" + str(day001) + ".xlsx")
