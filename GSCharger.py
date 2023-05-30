@@ -29,7 +29,6 @@ dir_path = None  # 폴더 경로 담을 변수 생성
 
 excelfilenum = 0
 
-
 def folder_select():
     global dir_path
     dir_path = filedialog.askdirectory(initialdir="./", \
@@ -63,16 +62,20 @@ def warning():
 
         print(len(warningphoto))
 
-        # if len(warningphoto) != 0:
-        f.write('충전기 [ {0:>10} ]번 사진정보 확인 바랍니다.\n'.format(', '.join(map(str, warningphoto))))   # 가운데 정렬
+        for j in range(len(warningphoto)):
+            f.write('충전기 [ {0:>10} ]번 사진정보 확인 바랍니다.\n'.format(warningphoto[j]))   # 가운데 정렬
+            # f.write('충전기 [ {0:>10} ]번 사진정보 확인 바랍니다.\n'.format(', '.join(map(str, warningphoto[j]))))  # 가운데 정렬
+
+        f.write('-' * 40 + '\n')
 
         #for cnt in range(len(noChargNum)): # 충전기 번호가 없는 경우
     if len(noChargNum) != 0:
-        # f.write('충전기 [ {0} ]번 파일은 등록되지 않은 충전기 번호이니 참고하시기 바랍니다.\n'.format(', '.join(map(str, noChargNum))))  # 가운데 정렬
-        f.write('충전기 [ {0:>10} ]번 기준정보 확인 바랍니다.\n'.format(', '.join(map(str, noChargNum))))  # 가운데 정렬
-        # f.write('충전기 [ {0:>10} ]이 파일 생성에 실패하였습니다.\n'.format(warningphoto[i]))  # 오른쪽 정렬
+        for j in range(len(noChargNum)):
+            f.write('충전기 [ {0:>10} ]번 기준정보 확인 바랍니다.\n'.format(noChargNum[j]))  # 가운데 정렬
+            # f.write('충전기 [ {0:>10} ]번 기준정보 확인 바랍니다.\n'.format(', '.join(map(str, noChargNum[j]))))  # 가운데 정렬
 
-    f.write('#' * 40)
+
+    #f.write('#' * 40)
     f.close()
 
     f = open(f"생성되지 않은 파일_{ss}.txt", 'r')
@@ -102,6 +105,8 @@ move_resize_photo = newpath + '/축소 사진/'
 resultpath = newpath + '/결과/'
 movefilesrc = '완료폴더/'
 path = './점검데이터.xlsx'
+
+
 pwd = os.getcwd()
 
 j = 1
@@ -184,6 +189,7 @@ for name in file_names:
 ############################# 충전기 갯수 카운트 및 이미지 리사이즈 ########################################
 from PIL import Image
 
+
 chargernum = 1  # 충전기의 갯수
 사진없는개수 = {}
 
@@ -244,6 +250,10 @@ wsNew = wbMaster['정기점검보고서']
 wbSlave = load_workbook('점검데이터.xlsx', data_only=True)
 wsSlave = wbSlave['점검정보']
 
+dongurami_path = '동그라미.png'
+dongurami = Image(dongurami_path)
+
+
 ############################# 추가해서 수정해야함 ########################################
 
 warningphoto = []
@@ -260,6 +270,8 @@ for i in tqdm(range(chargernum - 1)):
     wbSlave = load_workbook('점검데이터.xlsx', data_only=True)
     # slavestandard = wbSlave['참조데이터']
     wsSlave = wbSlave['점검정보']
+    dongurami_path = '동그라미.png'
+    dongurami = Image(dongurami_path)
 
     충전기번호 = wsSlave['2'][i + 1].value
     set_value('G7', 충전기번호)
@@ -314,7 +326,29 @@ for i in tqdm(range(chargernum - 1)):
     set_value('E15', 충전기용량)
 
     수량 = str(wsSlave['5'][1 + i].value)
-    set_value('G9', "충전기 총수량 : " + 수량 + "대")
+    set_value('I9', 수량 + "대")
+
+    충전기설치유형 = wsSlave['49'][1 + i].value
+
+    기타충전기설치유형 = wsSlave['50'][1 + i].value
+
+    if 충전기설치유형 == '스탠트형':
+        set_value('D16', 충전기설치유형)
+        wsMaster.add_image(dongurami, 'D16')
+
+    elif 충전기설치유형 == '벽걸이형':
+        set_value('E16', 충전기설치유형)
+        wsMaster.add_image(dongurami, 'E16')
+
+    elif 충전기설치유형 == '이동형':
+        set_value('F16', 충전기설치유형)
+        wsMaster.add_image(dongurami, 'F16')
+
+    elif 충전기설치유형 == '기타':
+        set_value('H16', 기타충전기설치유형)
+        wsMaster.add_image(dongurami, 'H16')
+
+    #wbMaster.save("정기점검보고서.xlsx")
 
     무료주차 = wsSlave['27'][1 + i].value
     set_value('D23', 무료주차)
@@ -370,8 +404,14 @@ for i in tqdm(range(chargernum - 1)):
     소화설비 = wsSlave['25'][1 + i].value
     set_value('D67', 소화설비)
 
+    사용가능충전기 = wsSlave['47'][1 + i].value
+    set_value('I10', 사용가능충전기)
+
+    사용중충전기 = wsSlave['48'][1 + i].value
+    set_value('I11', 사용중충전기)
+
     passes = ['D21', 'D22', 'D23', 'D27', 'D28', 'D29', 'D34', 'D35', 'D50', 'D51', 'D54', 'G21', 'G22', 'G27', 'G28',
-              'G29', 'G49', 'G50', 'G51', 'J21', 'J27', 'J28', 'J33', 'J36']
+    'G29', 'G49', 'G50', 'G51', 'J21', 'J27', 'J28', 'J33', 'J36']
 
     for cell in passes:
         wsMaster[cell] = 'Y'
@@ -385,39 +425,39 @@ for i in tqdm(range(chargernum - 1)):
         src_img.append(path1)
 
         if os.path.exists(src_img[j]):
-            fileName = os.path.join(base,
-                                    str(충전기번호) + "-" + str(j + 1) + "(resize).jpg")  # 여기가 없음!!!!!!!!!!!!!!!!!!!!!!!!!!
+            fileName = os.path.join(base, str(충전기번호) + "-" + str(j + 1) + "(resize).jpg")  # 여기가 없음!!!!!!!!!!!!!!!!!!!!!!!!!!
             if os.path.exists(fileName):
                 img1 = Image(fileName)
                 print(fileName)
-                if (j == 0):
-                    position = 'B90'
-                elif (j == 1):
-                    position = 'G90'
-                elif (j == 2):
-                    position = 'B103'
-                elif (j == 3):
-                    position = 'G103'
-                elif (j == 4):
-                    position = 'B116'
-                elif (j == 5):
-                    position = 'G116'
-                else:
-                    pass
-                wsMaster.add_image(img1, position)
-            # shutil.move(photosrc + str(충전기번호) + "_" + str(j + 1) + ".jpg", movephoto + str(충전기번호) + "-" + str(j + 1) + ".jpg")
 
-            # else:
-            #    print(f"{fileName} (===>fileName) ")
-        # else:
-        #   print(f"{src_img[j]} (src image file) 사진이 없습니다.")
+    if (j == 0):
+        position = 'B90'
+    elif (j == 1):
+        position = 'G90'
+    elif (j == 2):
+        position = 'B103'
+    elif (j == 3):
+        position = 'G103'
+    elif (j == 4):
+        position = 'B116'
+    elif (j == 5):
+        position = 'G116'
+    else:
+        pass
+    wsMaster.add_image(img1, position)
+    # shutil.move(photosrc + str(충전기번호) + "_" + str(j + 1) + ".jpg", movephoto + str(충전기번호) + "-" + str(j + 1) + ".jpg")
+
+    # else:
+    #    print(f"{fileName} (===>fileName) ")
+    # else:
+    #   print(f"{src_img[j]} (src image file) 사진이 없습니다.")
     ############################# 출력형식 ########################################
 
-        if 사진없는개수[충전기번호] != 0:  # 사진이 있을 경우
-            wbMaster.save(str(충전기번호) + "-" + str(점검자) + "-" + str(day001) + ".xlsx")
+    if 사진없는개수[충전기번호] != 0:  # 사진이 있을 경우
+        wbMaster.save(str(충전기번호) + "-" + str(점검자) + "-" + str(day001) + ".xlsx")
 
-        else:
-            continue
+    else:
+        continue
     shutil.move(str(충전기번호) + "-" + str(점검자) + "-" + str(day001) + ".xlsx",
                 resultpath + "/" + str(충전기번호) + "-" + str(점검자) + "-" + str(day001) + ".xlsx")
     wbMaster.close()
