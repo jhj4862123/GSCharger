@@ -67,23 +67,27 @@ def warning():
             # f.write('충전기 [ {0:>10} ]번 사진정보 확인 바랍니다.\n'.format(', '.join(map(str, warningphoto[j]))))  # 가운데 정렬
 
         f.write('-' * 40 + '\n')
+        f.close()
 
         #for cnt in range(len(noChargNum)): # 충전기 번호가 없는 경우
     if len(noChargNum) != 0:
+        f = open(f"생성되지 않은 파일_{ss}.txt", 'a')
+        f.write(ss + " 기준\n")
+        f.write('#' * 40 + '\n')
+
         for j in range(len(noChargNum)):
             f.write('충전기 [ {0:>10} ]번 기준정보 확인 바랍니다.\n'.format(noChargNum[j]))  # 가운데 정렬
             # f.write('충전기 [ {0:>10} ]번 기준정보 확인 바랍니다.\n'.format(', '.join(map(str, noChargNum[j]))))  # 가운데 정렬
+        f.close()
 
+    if os.path.exists("생성되지 않은 파일_{ss}.txt"):
+        with open(filename, 'r') as f:
+            data = f.read()
+        f.close()
+        win32api.MessageBox(0, f"{data}", "파일생성오류", 16)
+        print(data)
+        shutil.move(f"생성되지 않은 파일_{ss}.txt", finishpath + f"생성되지 않은 파일_{ss}.txt")
 
-    #f.write('#' * 40)
-    f.close()
-
-    f = open(f"생성되지 않은 파일_{ss}.txt", 'r')
-    data = f.read()
-    f.close()
-    win32api.MessageBox(0, f"{data}", "파일생성오류", 16)
-    print(data)
-    shutil.move(f"생성되지 않은 파일_{ss}.txt", finishpath + f"생성되지 않은 파일_{ss}.txt")
 
 
 btn_active_dir = Button(file_frame, text="충전기 사진을 선택해 주세요. \n\n사진 형식 : 충전기번호_1.jpg\n ex) 1234_1.jpg", \
@@ -424,27 +428,28 @@ for i in tqdm(range(chargernum - 1)):
         path1 = os.path.join(base, str(충전기번호) + "_" + str(j + 1) + ".jpg")
         src_img.append(path1)
 
+
         if os.path.exists(src_img[j]):
             fileName = os.path.join(base, str(충전기번호) + "-" + str(j + 1) + "(resize).jpg")  # 여기가 없음!!!!!!!!!!!!!!!!!!!!!!!!!!
             if os.path.exists(fileName):
                 img1 = Image(fileName)
-                print(fileName)
+                print('\n' + fileName)
 
-    if (j == 0):
-        position = 'B90'
-    elif (j == 1):
-        position = 'G90'
-    elif (j == 2):
-        position = 'B103'
-    elif (j == 3):
-        position = 'G103'
-    elif (j == 4):
-        position = 'B116'
-    elif (j == 5):
-        position = 'G116'
-    else:
-        pass
-    wsMaster.add_image(img1, position)
+                if (j == 0):
+                    position = 'B90'
+                elif (j == 1):
+                    position = 'G90'
+                elif (j == 2):
+                    position = 'B103'
+                elif (j == 3):
+                    position = 'G103'
+                elif (j == 4):
+                    position = 'B116'
+                else:
+                    position = 'G116'
+                # else:
+                #     pass
+                wsMaster.add_image(img1, position)
     # shutil.move(photosrc + str(충전기번호) + "_" + str(j + 1) + ".jpg", movephoto + str(충전기번호) + "-" + str(j + 1) + ".jpg")
 
     # else:
@@ -458,6 +463,7 @@ for i in tqdm(range(chargernum - 1)):
 
     else:
         continue
+
     shutil.move(str(충전기번호) + "-" + str(점검자) + "-" + str(day001) + ".xlsx",
                 resultpath + "/" + str(충전기번호) + "-" + str(점검자) + "-" + str(day001) + ".xlsx")
     wbMaster.close()
