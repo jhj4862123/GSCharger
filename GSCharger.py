@@ -45,7 +45,7 @@ def folder_select():
 
 def set_value(cell_number, copy_value):
     wsMaster[cell_number] = str(copy_value)
-    wsMaster[cell_number].fill = PatternFill(start_color='FF9900', end_color='FF9900', fill_type='solid')
+    #wsMaster[cell_number].fill = PatternFill(start_color='FF9900', end_color='FF9900', fill_type='solid')
 
 
 def set_value2(cell_number, copy_value):
@@ -180,15 +180,33 @@ for name in file_names:
             dst = temp_name[j] + '-' + temp_name[-2] + '.jpg'
             dst = os.path.join(photosrc, dst)
             print(f"dst : {dst}")
-            shutil.copyfile(src, dst)
-        shutil.move(os.path.join(dir_path, src_name), os.path.join(movephoto, src_name))
+
+            if os.path.exists(dst):
+                continue
+            else:
+                if os.path.exists(src):
+                    shutil.copyfile(src, dst)
+                    shutil.move(os.path.join(dir_path, src_name), os.path.join(movephoto, src_name))
+                else:
+                    print(f"파일이 존재하지 않습니다: {src}")
+
 
     else:
         dst = temp_name[0] + '-' + temp_name[-2] + '.jpg'
         dst = os.path.join(photosrc, dst)
         print(f"dst : {dst}")
-        shutil.copyfile(src, dst)
-        shutil.move(os.path.join(dir_path, src_name), os.path.join(movephoto, src_name))
+
+        if os.path.exists(dst):
+            continue
+
+        else:
+            if os.path.exists(src):
+                shutil.copyfile(src, dst)
+                shutil.move(os.path.join(dir_path, src_name), os.path.join(movephoto, src_name))
+            else:
+                print(f"파일이 존재하지 않습니다: {src}")
+
+
 
 ############################# 충전기 갯수 카운트 및 이미지 리사이즈 ########################################
 from PIL import Image
